@@ -1,6 +1,6 @@
 FROM counterparty/base
 
-MAINTAINER Counterparty Developers <dev@counterparty.io>
+MAINTAINER Counterparty Developers <j-dog@j-dog.net>
 
 # install additional deps
 RUN apt-get update && apt-get upgrade -y && apt-get update

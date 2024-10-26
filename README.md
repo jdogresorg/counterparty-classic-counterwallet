@@ -1,23 +1,11 @@
-[![Build Status Travis](https://travis-ci.org/CounterpartyXCP/counterwallet.svg?branch=develop)](https://travis-ci.org/CounterpartyXCP/counterwallet)
-[![Build Status Circle](https://circleci.com/gh/CounterpartyXCP/counterwallet.svg?&style=shield)](https://circleci.com/gh/CounterpartyXCP/counterwallet)
-[![Slack Status](http://slack.counterparty.io/badge.svg)](http://slack.counterparty.io)
-
 Counterwallet
 ================
 
-Online Webwallet for [Counterparty](http://www.counterparty.io).
+Online Webwallet for Counterparty Classic
 
 Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however virtually all the original code has been removed or rewritten).
 
 [Counterwallet User Documentation](./docs/index.md)
-
-
-Production Systems
--------------------
-
-* Main page: **[counterwallet.io](https://counterwallet.io/)**
-* Primary server -- Mainnet: **[wallet.counterwallet.io](https://wallet.counterwallet.io/)**
-* Primary server -- Testnet: **[wallet-testnet.counterwallet.io](https://wallet-testnet.counterwallet.io/)**
 
 
 Features
@@ -89,7 +77,7 @@ grunt freeze
 Setting up your own Counterwallet Server
 -----------------------------------------
 
-See [this link](http://counterparty.io/docs/federated_node/) for more info.
+See [this link](https://github.com/jdogresorg/counterparty-classic-fednode) for more info.
 
 Development
 -----------

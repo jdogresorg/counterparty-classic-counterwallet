@@ -1,13 +1,31 @@
-FROM counterparty/base
+FROM ubuntu:18.04
 
-MAINTAINER Counterparty Developers <j-dog@j-dog.net>
+#MAINTAINER Counterparty Classic Developers <j-dog@j-dog.net>
+
+# Install common dependencies
+RUN apt-get update && apt-get install -y apt-utils ca-certificates wget curl git mercurial \
+    python3 python3-dev python3-pip python3-setuptools python3-appdirs \
+    build-essential vim unzip software-properties-common sudo gettext-base \
+    net-tools iputils-ping telnet lynx locales
+
+# Upgrade pip3 to newest
+RUN pip3 install --upgrade pip
+
+# Set locale
+RUN dpkg-reconfigure -f noninteractive locales && \
+    locale-gen en_US.UTF-8 && \
+    /usr/sbin/update-locale LANG=en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+
+# Set home dir env variable
+ENV HOME /root
 
 # install additional deps
 RUN apt-get update && apt-get upgrade -y && apt-get update
-RUN apt-get -y install ssl-cert make libpcre3-dev libxslt1-dev libgeoip-dev unzip zip build-essential libssl-dev libxslt1.1 libgeoip1 geoip-database libpcre3 libgd2-xpm-dev
+RUN apt-get -y install ssl-cert make libpcre3-dev libxslt1-dev libgeoip-dev unzip zip build-essential libssl-dev libxslt1.1 libgeoip1 geoip-database libpcre3 libgd-dev
 
 # install nginx
-ENV OPENRESTY_VER="1.9.7.4"
+ENV OPENRESTY_VER="1.27.1.1"
 RUN wget -O /tmp/nginx-openresty.tar.gz http://openresty.org/download/openresty-${OPENRESTY_VER}.tar.gz
 RUN mkdir -p /tmp/ngx_openresty-${OPENRESTY_VER} && tar xfzv /tmp/nginx-openresty.tar.gz -C /tmp/ngx_openresty-${OPENRESTY_VER} --strip-components 1
 RUN cd /tmp/ngx_openresty-${OPENRESTY_VER} && ./configure \

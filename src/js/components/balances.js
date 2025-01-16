@@ -421,6 +421,7 @@ function SendModalViewModel() {
   self.rawBalance = ko.observable(null);
   self.divisible = ko.observable();
   self.feeOption = ko.observable('optimal');
+  self.calculatedFee = ko.observable(0);
   self.customFee = ko.observable(null).extend({
     validation: [{
       validator: function(val, self) {
@@ -593,7 +594,7 @@ function SendModalViewModel() {
     var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
     var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
     if (self.asset() === KEY_ASSET.BTC)
-      balRemaining = subFloat(balRemaining, normalizeQuantity(MIN_FEE))  // include the fee
+      balRemaining = subFloat(balRemaining, self.calculatedFee())  // include the fee
     if (balRemaining < 0) return null;
     return balRemaining;
   }, self);
@@ -719,7 +720,7 @@ function SendModalViewModel() {
       asset: self.asset(),
       _asset_divisible: self.divisible(),
       _pubkeys: additionalPubkeys.concat(self._additionalPubkeys),
-      _fee_option: 'custom',
+      _fee_option: self.feeOption(),
       _custom_fee: self.feeController.getCustomFee()
     };
 
@@ -897,6 +898,18 @@ function CreateDispenserModalViewModel() {
     }
   });
 
+  self.give_quantity.subscribeChanged(function(newValue, prevValue){
+    self.customFee.valueHasMutated();
+  })
+
+  self.escrow_quantity.subscribeChanged(function(newValue, prevValue){
+    self.customFee.valueHasMutated();
+  })  
+
+  self.mainchainrate.subscribeChanged(function(newValue, prevValue){
+    self.customFee.valueHasMutated();
+  })
+
   self.normalizedBalance = ko.computed(function() {
     if (self.address() === null || self.rawBalance() === null) return null;
     return normalizeQuantity(self.rawBalance(), self.divisible());
@@ -979,8 +992,8 @@ function CreateDispenserModalViewModel() {
       escrow_quantity: denormalizeQuantity(parseFloat(self.escrow_quantity()), self.divisible()),
       mainchainrate: denormalizeQuantity(parseFloat(self.mainchainrate()), true),
       status: 0, // 0 for open, 10 for close
-      _fee_option: 'custom',
-      _custom_fee: self.feeController.getCustomFee()
+      _fee_option: self.feeOption(),
+      _custom_fee: 0
     };
 
     return params
@@ -1006,11 +1019,12 @@ function CreateDispenserModalViewModel() {
     self.assetDisp(assetDisp);
     self.rawBalance(rawBalance);
     self.divisible(isDivisible);
+    self.feeOption("optimal")
     $('#sendFeeOption').select2("val", self.feeOption()); //hack
     self.shown(true);
 
-    $('#MemoType').select2("val", self.memoType()); // hack to set select2 value
-    trackDialogShow('Send');
+    //$('#MemoType').select2("val", self.memoType()); // hack to set select2 value
+    //trackDialogShow('Send');
   }
 
   self.hide = function() {

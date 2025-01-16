@@ -439,14 +439,14 @@
 
         <fieldset>
           <section><!-- fee section -->
-            <div class="row">
+            <div class="row" style="display:none">
               <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
               <div class="col col-sm-9">
                   <input name="feeSlider" data-bind="value: feeSlider, valueUpdate: 'input', attr: {max: feeSliderMax}" type="range" min="0" step="1">
               </div>
             </div>
             <div class="row">
-              <label class="control-label col col-sm-3">&nbsp;</label>
+              <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
               <div class="col col-sm-9">
                 <div class="fee-info" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet">
                   <span class="formPaddedBot" data-bind="visible: transactionParamsAreValid, locale: feeDetailsLocaleName, localeArgs: feeDetailsLocaleArgs"></span>
@@ -470,7 +470,7 @@
             </div>
             <div class="col col-sm-5">
                 <label class="input">
-                    <input name="customFee" data-bind="visible: feeOption() === 'custom', value: customFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
+                    <input name="customFee" data-bind="visible: feeOption() === 'custom', valueUpdate: 'input', value: customFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
                 </label>
                 <span class="invalid" data-bind="validationMessage: customFee"></span>
             </div>

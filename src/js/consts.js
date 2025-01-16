@@ -52,7 +52,7 @@ var SUBASSET_MAX_DISP_LENGTH = 20;
 var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
-var MIN_FEE = 20000; // in satoshis (== .0002 BTC)
+var MIN_FEE = 400; // in satoshis (== .0002 BTC)
 var REGULAR_DUST_SIZE = 5430;
 var MULTISIG_DUST_SIZE = 7800;
 var MIN_BALANCE_FOR_ACTION = 50000; //in satoshis ... == .0005

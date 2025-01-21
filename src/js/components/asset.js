@@ -111,6 +111,7 @@ function AssetViewModel(props) {
       return;
     }
     if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
+    var btcBalance = WALLET.getBalance(self.ADDRESS, KEY_ASSET.BTC);
     CREATE_DISPENSER_MODAL.show(self.ADDRESS, self.ASSET, self.ASSET_DISP, self.rawAvailableBalance(), self.DIVISIBLE);
   }
 
@@ -130,7 +131,8 @@ function AssetViewModel(props) {
   self.issueAdditional = function() {
     assert(self.isMine() && !self.locked());
     if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
-    ISSUE_ADDITIONAL_ASSET_MODAL.show(self.ADDRESS, self.DIVISIBLE, self);
+    var btcBalance = WALLET.getBalance(self.ADDRESS, KEY_ASSET.BTC);
+    ISSUE_ADDITIONAL_ASSET_MODAL.show(self.ADDRESS, self.DIVISIBLE, btcBalance, self);
   };
 
   self.transfer = function() {
@@ -186,7 +188,8 @@ function AssetViewModel(props) {
 
   self.changeDescription = function() {
     if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
-    CHANGE_ASSET_DESCRIPTION_MODAL.show(self.ADDRESS, self);
+    var btcBalance = WALLET.getBalance(self.ADDRESS, KEY_ASSET.BTC);
+    CHANGE_ASSET_DESCRIPTION_MODAL.show(self.ADDRESS, btcBalance, self);
   };
 
 }

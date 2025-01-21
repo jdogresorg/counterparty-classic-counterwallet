@@ -838,6 +838,7 @@
   "fee_option_custom": "Custom Fee",
   "enter_fee_option_custom": "Fee in Satoshi/Byte",
 
+  "fee_details_only": "(%s Satoshis/Byte)",
   "fee_priority_details_no_wait": "Estimated wait: next block (%s Satoshis/Byte)",
   "fee_priority_details_up_to": "Estimated wait: up to %s blocks (%s Satoshis/Byte)",
   "fee_priority_details_between": "Estimated wait: between %s - %s blocks (%s Satoshis/Byte)",

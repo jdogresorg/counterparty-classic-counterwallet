@@ -116,8 +116,11 @@ var CWFeeModelMixin = function(modalDialogModel, opts) {
     clearGeneratedTransaction();
 
     // update fee information display
-    CWBitcoinFees.getFeeByOffset(getObs('feeSlider'), function(fee) {
-      if (fee.maxDelay == 0) {
+    CWBitcoinFees.getFeeByName(getObs('feeOption'), function(fee) {
+      if (fee == null){//Custom fee
+        setObs('feePriorityLocaleName', 'fee_details_only');
+        setObs('feePriorityLocaleArgs', [getObs('customFee')]);      
+      } else if (fee.maxDelay == 0) {
         setObs('feePriorityLocaleName', 'fee_priority_details_no_wait');
         setObs('feePriorityLocaleArgs', [fee.fee]);
       } else if (fee.minDelay == 0) {

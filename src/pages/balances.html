@@ -785,16 +785,16 @@
           </div></section>
 
           <section><!-- fee section -->
-            <div class="row">
+            <div class="row" style="display:none">
               <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
               <div class="col col-sm-9">
                   <input name="feeSlider" data-bind="value: feeSlider, valueUpdate: 'input', attr: {max: feeSliderMax}" type="range" min="0" step="1">
               </div>
             </div>
             <div class="row">
-              <label class="control-label col col-sm-3">&nbsp;</label>
+              <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'">&nbsp;</label>
               <div class="col col-sm-9">
-                <div class="fee-info">
+                <div class="fee-info" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet">
                   <span class="formPaddedBot" data-bind="visible: transactionParamsAreValid, locale: feeDetailsLocaleName, localeArgs: feeDetailsLocaleArgs"></span>
                   <br />
                   <span class="formPaddedBot" data-bind="visible: customFee, locale: feePriorityLocaleName, localeArgs: feePriorityLocaleArgs"></span>
@@ -803,7 +803,26 @@
             </div>
           </section>
 
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'fee_option'"></label>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <select id="createAssetFeeOption" name="feeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: feeOption, valueUpdate: 'input'" style="width:100%">
+                      <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
+                      <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
+                      <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
+                    </select>
+                </label>
+            </div>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <input name="customFee" data-bind="visible: feeOption() === 'custom', valueUpdate: 'input', value: customFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: customFee"></span>
+            </div>
+          </div></section>
         </fieldset></form>
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
         <p class="formPadded" style="text-align:center" data-bind="visible: tokenNameType== 'alphabetic', locale: 'asset_creation_fee_xcp', localeArgs: ASSET_CREATION_FEE_XCP"></p>
       </div>
       <div class="modal-footer">
@@ -837,16 +856,16 @@
           </div></section>
 
           <section><!-- fee section -->
-            <div class="row">
+            <div class="row" style="display:none">
               <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
               <div class="col col-sm-9">
                   <input name="feeSlider" data-bind="value: feeSlider, valueUpdate: 'input', attr: {max: feeSliderMax}" type="range" min="0" step="1">
               </div>
             </div>
             <div class="row">
-              <label class="control-label col col-sm-3">&nbsp;</label>
+              <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'">&nbsp;</label>
               <div class="col col-sm-9">
-                <div class="fee-info">
+                <div class="fee-info" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet">
                   <span class="formPaddedBot" data-bind="visible: transactionParamsAreValid, locale: feeDetailsLocaleName, localeArgs: feeDetailsLocaleArgs"></span>
                   <br />
                   <span class="formPaddedBot" data-bind="visible: customFee, locale: feePriorityLocaleName, localeArgs: feePriorityLocaleArgs"></span>
@@ -855,7 +874,26 @@
             </div>
           </section>
 
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'fee_option'"></label>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <select id="issueAdditionalAssetFeeOption" name="feeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: feeOption, valueUpdate: 'input'" style="width:100%">
+                      <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
+                      <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
+                      <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
+                    </select>
+                </label>
+            </div>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <input name="customFee" data-bind="visible: feeOption() === 'custom', valueUpdate: 'input', value: customFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: customFee"></span>
+            </div>
+          </div></section>
         </fieldset></form>
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
@@ -887,16 +925,16 @@
           </div></section>
 
           <section><!-- fee section -->
-            <div class="row">
+            <div class="row" style="display:none">
               <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
               <div class="col col-sm-9">
                   <input name="feeSlider" data-bind="value: feeSlider, valueUpdate: 'input', attr: {max: feeSliderMax}" type="range" min="0" step="1">
               </div>
             </div>
             <div class="row">
-              <label class="control-label col col-sm-3">&nbsp;</label>
+              <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'">&nbsp;</label>
               <div class="col col-sm-9">
-                <div class="fee-info">
+                <div class="fee-info" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet">
                   <span class="formPaddedBot" data-bind="visible: transactionParamsAreValid, locale: feeDetailsLocaleName, localeArgs: feeDetailsLocaleArgs"></span>
                   <br />
                   <span class="formPaddedBot" data-bind="visible: customFee, locale: feePriorityLocaleName, localeArgs: feePriorityLocaleArgs"></span>
@@ -905,7 +943,26 @@
             </div>
           </section>
 
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'fee_option'"></label>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <select id="transferAssetFeeOption" name="feeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: feeOption, valueUpdate: 'input'" style="width:100%">
+                      <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
+                      <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
+                      <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
+                    </select>
+                </label>
+            </div>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <input name="customFee" data-bind="visible: feeOption() === 'custom', valueUpdate: 'input', value: customFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: customFee"></span>
+            </div>
+          </div></section>
         </fieldset></form>
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
@@ -941,16 +998,16 @@
           </div></section>
 
           <section><!-- fee section -->
-            <div class="row">
+            <div class="row" style="display:none">
               <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
               <div class="col col-sm-9">
                   <input name="feeSlider" data-bind="value: feeSlider, valueUpdate: 'input', attr: {max: feeSliderMax}" type="range" min="0" step="1">
               </div>
             </div>
             <div class="row">
-              <label class="control-label col col-sm-3">&nbsp;</label>
+              <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'">&nbsp;</label>
               <div class="col col-sm-9">
-                <div class="fee-info">
+                <div class="fee-info" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet">
                   <span class="formPaddedBot" data-bind="visible: transactionParamsAreValid, locale: feeDetailsLocaleName, localeArgs: feeDetailsLocaleArgs"></span>
                   <br />
                   <span class="formPaddedBot" data-bind="visible: customFee, locale: feePriorityLocaleName, localeArgs: feePriorityLocaleArgs"></span>
@@ -959,7 +1016,26 @@
             </div>
           </section>
 
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'fee_option'"></label>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <select id="changeAssetDescriptionFeeOption" name="feeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: feeOption, valueUpdate: 'input'" style="width:100%">
+                      <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
+                      <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
+                      <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
+                    </select>
+                </label>
+            </div>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <input name="customFee" data-bind="visible: feeOption() === 'custom', valueUpdate: 'input', value: customFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: customFee"></span>
+            </div>
+          </div></section>
         </fieldset></form>
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
         <div class="formPaddedBot" data-bind="locale: 'token_an_image'"></div>
       </div>
       <div class="modal-footer">
@@ -1013,16 +1089,16 @@
           </div></section>
 
           <section><!-- fee section -->
-            <div class="row">
+            <div class="row" style="display:none">
               <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
               <div class="col col-sm-9">
                   <input name="feeSlider" data-bind="value: feeSlider, valueUpdate: 'input', attr: {max: feeSliderMax}" type="range" min="0" step="1">
               </div>
             </div>
             <div class="row">
-              <label class="control-label col col-sm-3">&nbsp;</label>
+              <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'">&nbsp;</label>
               <div class="col col-sm-9">
-                <div class="fee-info">
+                <div class="fee-info" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet">
                   <span class="formPaddedBot" data-bind="visible: transactionParamsAreValid, locale: feeDetailsLocaleName, localeArgs: feeDetailsLocaleArgs"></span>
                   <br />
                   <span class="formPaddedBot" data-bind="visible: customFee, locale: feePriorityLocaleName, localeArgs: feePriorityLocaleArgs"></span>
@@ -1031,7 +1107,26 @@
             </div>
           </section>
 
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'fee_option'"></label>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <select id="payDividendFeeOption" name="feeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: feeOption, valueUpdate: 'input'" style="width:100%">
+                      <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
+                      <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
+                      <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
+                    </select>
+                </label>
+            </div>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <input name="customFee" data-bind="visible: feeOption() === 'custom', valueUpdate: 'input', value: customFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: customFee"></span>
+            </div>
+          </div></section>
         </fieldset></form>
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
         <div class="formPaddedBot" data-bind="fadeVisibleInOnly: quantityPerUnit() && selectedDividendAsset() && totalPay()">
             <p>
               <span data-bind="locale: 'this_distribution_payment'"></span>
@@ -1215,16 +1310,16 @@
           </div></section>
 
           <section><!-- fee section -->
-            <div class="row">
+            <div class="row" style="display:none">
               <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
               <div class="col col-sm-9">
                   <input name="feeSlider" data-bind="value: feeSlider, valueUpdate: 'input', attr: {max: feeSliderMax}" type="range" min="0" step="1">
               </div>
             </div>
             <div class="row">
-              <label class="control-label col col-sm-3">&nbsp;</label>
+              <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'">&nbsp;</label>
               <div class="col col-sm-9">
-                <div class="fee-info">
+                <div class="fee-info" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet">
                   <span class="formPaddedBot" data-bind="visible: transactionParamsAreValid, locale: feeDetailsLocaleName, localeArgs: feeDetailsLocaleArgs"></span>
                   <br />
                   <span class="formPaddedBot" data-bind="visible: customFee, locale: feePriorityLocaleName, localeArgs: feePriorityLocaleArgs"></span>
@@ -1233,7 +1328,26 @@
             </div>
           </section>
 
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'fee_option'"></label>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <select id="broadcastFeeOption" name="feeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: feeOption, valueUpdate: 'input'" style="width:100%">
+                      <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
+                      <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
+                      <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
+                    </select>
+                </label>
+            </div>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <input name="customFee" data-bind="visible: feeOption() === 'custom', valueUpdate: 'input', value: customFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: customFee"></span>
+            </div>
+          </div></section>
         </fieldset></form>
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
@@ -1371,14 +1485,14 @@
 
         <fieldset>
           <section><!-- fee section -->
-            <div class="row">
+            <div class="row" style="display:none">
               <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
               <div class="col col-sm-9">
                   <input name="feeSlider" data-bind="value: feeSlider, valueUpdate: 'input', attr: {max: feeSliderMax}" type="range" min="0" step="1">
               </div>
             </div>
             <div class="row">
-              <label class="control-label col col-sm-3">&nbsp;</label>
+              <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'">&nbsp;</label>
               <div class="col col-sm-9">
                 <div class="fee-info" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet">
                   <span class="formPaddedBot" data-bind="visible: transactionParamsAreValid, locale: feeDetailsLocaleName, localeArgs: feeDetailsLocaleArgs"></span>
@@ -1393,7 +1507,7 @@
             <label class="control-label col col-sm-2" data-bind="locale: 'fee_option'"></label>
             <div class="col col-sm-5">
                 <label class="input">
-                    <select id="sendFeeOption" name="feeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: feeOption, valueUpdate: 'input'" style="width:100%">
+                    <select id="createAssetFeeOption" name="feeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: feeOption, valueUpdate: 'input'" style="width:100%">
                       <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
                       <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
                       <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
@@ -1402,14 +1516,13 @@
             </div>
             <div class="col col-sm-5">
                 <label class="input">
-                    <input name="customFee" data-bind="visible: feeOption() === 'custom', value: customFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
+                    <input name="customFee" data-bind="visible: feeOption() === 'custom', valueUpdate: 'input', value: customFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
                 </label>
                 <span class="invalid" data-bind="validationMessage: customFee"></span>
             </div>
           </div></section>
-
         </fieldset></form>
-        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_dispensing', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>

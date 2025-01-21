@@ -33,6 +33,7 @@ function CreateAssetModalViewModel() {
   self.shown = ko.observable(false);
   self.address = ko.observable('');
   self.xcpBalance = ko.observable(0);
+  self.btcBalance = ko.observable(null);
 
   self.tokenNameType = ko.observable('alphabetic');
   self.tokenNameType.subscribe(
@@ -72,7 +73,8 @@ function CreateAssetModalViewModel() {
     }],
     isValidCustomFeeIfSpecified: self
   });
-
+  self.calculatedFee = ko.observable(0);
+  
   self.hasXCPForNamedAsset = ko.computed(function() {
     return self.xcpBalance() >= ASSET_CREATION_FEE_XCP;
   });
@@ -128,6 +130,35 @@ function CreateAssetModalViewModel() {
     });
 
     return ownedAssets;
+  }, self);
+
+  self.normalizedBalance = ko.computed(function() {
+      if (self.address() === null || self.btcBalance() === null) return null;
+      return self.btcBalance()
+  }, self);
+
+  self.dispNormalizedBalance = ko.computed(function() {
+    return smartFormat(self.normalizedBalance(), null, 8);
+  }, self);
+
+  self.normalizedBalRemaining = ko.computed(function() {
+    //var curBalance = normalizeQuantity(self.btcBalance(), self.divisible());
+    var curBalance = self.btcBalance();
+    var balRemaining = subFloat(curBalance, self.calculatedFee())
+    if (balRemaining < 0) return null;
+    return balRemaining;
+  }, self);
+
+  self.dispNormalizedBalRemaining = ko.computed(function() {
+    return smartFormat(self.normalizedBalRemaining(), null, 8);
+  }, self);
+
+  self.normalizedBalRemainingIsSet = ko.computed(function() {
+    return self.normalizedBalRemaining() !== null;
+  }, self);
+
+  self.customFeeIsNull = ko.computed(function() {
+    return self.customFee() == null;
   }, self);
 
   self.validationModel = ko.validatedObservable({
@@ -241,7 +272,7 @@ function CreateAssetModalViewModel() {
       divisible: self.divisible(),
       description: self.description(),
       transfer_destination: null,
-      _fee_option: 'custom',
+      _fee_option: self.feeOption(),
       _custom_fee: self.feeController.getCustomFee()
     }
   }
@@ -256,10 +287,11 @@ function CreateAssetModalViewModel() {
     buildTransactionData: self.buildCreateAssetTransactionData
   });
 
-  self.show = function(address, xcpBalance, resetForm) {
+  self.show = function(address, xcpBalance, btcBalance, resetForm) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
     if (resetForm) self.resetForm();
     self.xcpBalance(xcpBalance);
+    self.btcBalance(btcBalance);
     self.address(address);
     self.tokenNameType('numeric');
     self.generateRandomId();
@@ -280,7 +312,8 @@ function IssueAdditionalAssetModalViewModel() {
   self.address = ko.observable(''); // SOURCE address (supplied)
   self.divisible = ko.observable();
   self.asset = ko.observable();
-
+  self.btcBalance = ko.observable(null);
+  
   self.additionalIssue = ko.observable('').extend({
     required: true,
     isValidPositiveQuantity: self,
@@ -294,6 +327,25 @@ function IssueAdditionalAssetModalViewModel() {
     }
   });
 
+  self.calculatedFee = ko.observable(0);
+  self.feeOption = ko.observable('optimal');
+  self.customFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.feeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+  self.feeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.customFee(null);
+      self.customFee.isModified(false);
+    }
+  });
+
   self.dispTotalIssued = ko.computed(function() {
     if (!self.asset()) return null;
     return self.asset().dispTotalIssued();
@@ -304,12 +356,44 @@ function IssueAdditionalAssetModalViewModel() {
     return denormalizeQuantity(self.additionalIssue(), self.asset().DIVISIBLE);
   }, self);
 
+  self.normalizedBalance = ko.computed(function() {
+      if (self.address() === null || self.btcBalance() === null) return null;
+      return self.btcBalance()
+  }, self);
+
+  self.dispNormalizedBalance = ko.computed(function() {
+    return smartFormat(self.normalizedBalance(), null, 8);
+  }, self);
+
+  self.normalizedBalRemaining = ko.computed(function() {
+    //var curBalance = normalizeQuantity(self.btcBalance(), self.divisible());
+    var curBalance = self.btcBalance();
+    var balRemaining = subFloat(curBalance, self.calculatedFee())
+    if (balRemaining < 0) return null;
+    return balRemaining;
+  }, self);
+
+  self.dispNormalizedBalRemaining = ko.computed(function() {
+    return smartFormat(self.normalizedBalRemaining(), null, 8);
+  }, self);
+
+  self.normalizedBalRemainingIsSet = ko.computed(function() {
+    return self.normalizedBalRemaining() !== null;
+  }, self);
+
+  self.customFeeIsNull = ko.computed(function() {
+    return self.customFee() == null;
+  }, self);
+
   self.validationModel = ko.validatedObservable({
-    additionalIssue: self.additionalIssue
+    additionalIssue: self.additionalIssue,
+    customFee: self.customFee
   });
 
   self.resetForm = function() {
     self.additionalIssue(null);
+    self.feeOption('optimal');
+    self.customFee(null);
     self.validationModel.errors.showAllMessages(false);
     self.feeController.reset();
   }
@@ -349,7 +433,7 @@ function IssueAdditionalAssetModalViewModel() {
         divisible: self.asset().DIVISIBLE,
         description: self.asset().description(),
         transfer_destination: null,
-        _fee_option: 'custom',
+        _fee_option: self.feeOption(),
         _custom_fee: self.feeController.getCustomFee()
     }
   }
@@ -364,9 +448,10 @@ function IssueAdditionalAssetModalViewModel() {
     buildTransactionData: self.buildIssueAdditionalTransactionData
   });
 
-  self.show = function(address, divisible, asset, resetForm) {
+  self.show = function(address, divisible, asset, btcBalance, resetForm) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
     if (resetForm) self.resetForm();
+    self.btcBalance(btcBalance);
     self.address(address);
     self.divisible(divisible);
     self.asset(asset);
@@ -385,6 +470,28 @@ function TransferAssetModalViewModel() {
   self.shown = ko.observable(false);
   self.address = ko.observable(''); // SOURCE address (supplied)
   self.asset = ko.observable();
+  self.btcBalance = ko.observable(null);
+
+  self.calculatedFee = ko.observable(0);
+  self.feeOption = ko.observable('optimal');
+  self.customFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.feeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+  self.feeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.customFee(null);
+      self.customFee.isModified(false);
+    }
+  });
+
+
 
   self.destAddress = ko.observable('').trimmed().extend({
     required: true,
@@ -392,12 +499,44 @@ function TransferAssetModalViewModel() {
     isNotSameBitcoinAddress: self
   });
 
+  self.normalizedBalance = ko.computed(function() {
+      if (self.address() === null || self.btcBalance() === null) return null;
+      return self.btcBalance()
+  }, self);
+
+  self.dispNormalizedBalance = ko.computed(function() {
+    return smartFormat(self.normalizedBalance(), null, 8);
+  }, self);
+
+  self.normalizedBalRemaining = ko.computed(function() {
+    //var curBalance = normalizeQuantity(self.btcBalance(), self.divisible());
+    var curBalance = self.btcBalance();
+    var balRemaining = subFloat(curBalance, self.calculatedFee())
+    if (balRemaining < 0) return null;
+    return balRemaining;
+  }, self);
+
+  self.dispNormalizedBalRemaining = ko.computed(function() {
+    return smartFormat(self.normalizedBalRemaining(), null, 8);
+  }, self);
+
+  self.normalizedBalRemainingIsSet = ko.computed(function() {
+    return self.normalizedBalRemaining() !== null;
+  }, self);
+
+  self.customFeeIsNull = ko.computed(function() {
+    return self.customFee() == null;
+  }, self);
+
   self.validationModel = ko.validatedObservable({
-    destAddress: self.destAddress
+    destAddress: self.destAddress,
+    customFee: self.customFee
   });
 
   self.resetForm = function() {
     self.destAddress('');
+    self.feeOption('optimal');
+    self.customFee(null);
     self.validationModel.errors.showAllMessages(false);
     self.feeController.reset();
   }
@@ -436,7 +575,7 @@ function TransferAssetModalViewModel() {
         divisible: self.asset().DIVISIBLE,
         description: self.asset().description(),
         transfer_destination: self.destAddress(),
-        _fee_option: 'custom',
+        _fee_option: self.feeOption(),
         _custom_fee: self.feeController.getCustomFee()
       }
   }
@@ -451,9 +590,10 @@ function TransferAssetModalViewModel() {
     buildTransactionData: self.buildTransferTransactionData
   });
 
-  self.show = function(sourceAddress, asset, resetForm) {
+  self.show = function(sourceAddress, asset, btcBalance, resetForm) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
     if (resetForm) self.resetForm();
+    self.btcBalance(btcBalance);
     self.address(sourceAddress);
     self.asset(asset);
     self.shown(true);
@@ -471,6 +611,26 @@ function ChangeAssetDescriptionModalViewModel() {
   self.shown = ko.observable(false);
   self.address = ko.observable(''); // SOURCE address (supplied)
   self.asset = ko.observable();
+  self.btcBalance = ko.observable(null);
+  
+  self.calculatedFee = ko.observable(0);
+  self.feeOption = ko.observable('optimal');
+  self.customFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.feeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+  self.feeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.customFee(null);
+      self.customFee.isModified(false);
+    }
+  });
 
   self.newDescription = ko.observable('').extend({
     required: true,
@@ -488,12 +648,44 @@ function ChangeAssetDescriptionModalViewModel() {
     return self.asset() ? self.asset().description() : '';
   }, self);
 
+  self.normalizedBalance = ko.computed(function() {
+      if (self.address() === null || self.btcBalance() === null) return null;
+      return self.btcBalance()
+  }, self);
+
+  self.dispNormalizedBalance = ko.computed(function() {
+    return smartFormat(self.normalizedBalance(), null, 8);
+  }, self);
+
+  self.normalizedBalRemaining = ko.computed(function() {
+    //var curBalance = normalizeQuantity(self.btcBalance(), self.divisible());
+    var curBalance = self.btcBalance();
+    var balRemaining = subFloat(curBalance, self.calculatedFee())
+    if (balRemaining < 0) return null;
+    return balRemaining;
+  }, self);
+
+  self.dispNormalizedBalRemaining = ko.computed(function() {
+    return smartFormat(self.normalizedBalRemaining(), null, 8);
+  }, self);
+
+  self.normalizedBalRemainingIsSet = ko.computed(function() {
+    return self.normalizedBalRemaining() !== null;
+  }, self);
+
+  self.customFeeIsNull = ko.computed(function() {
+    return self.customFee() == null;
+  }, self);
+
   self.validationModel = ko.validatedObservable({
-    newDescription: self.newDescription
+    newDescription: self.newDescription,
+    customFee: self.customFee
   });
 
   self.resetForm = function() {
     self.newDescription('');
+    self.feeOption('optimal');
+    self.customFee(null);
     self.validationModel.errors.showAllMessages(false);
     self.feeController.reset();
   }
@@ -531,7 +723,7 @@ function ChangeAssetDescriptionModalViewModel() {
       divisible: self.asset().DIVISIBLE,
       description: self.newDescription(),
       transfer_destination: null,
-      _fee_option: 'custom',
+      _fee_option: self.feeOption(),
       _custom_fee: self.feeController.getCustomFee()
     }
   }
@@ -546,9 +738,10 @@ function ChangeAssetDescriptionModalViewModel() {
     buildTransactionData: self.buildChangeDescriptionTransactionData
   });
 
-  self.show = function(address, asset, resetForm) {
+  self.show = function(address, asset, btcBalance, resetForm) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
     if (resetForm) self.resetForm();
+    self.btcBalance(btcBalance);
     self.address(address);
     self.asset(asset);
     self.shown(true);
@@ -600,6 +793,27 @@ function PayDividendModalViewModel() {
   self.addressVM = ko.observable(null); // SOURCE address view model(supplied)
   self.assetData = ko.observable(null);
   self.holderCount = ko.observable(null);
+  self.btcBalance = ko.observable(null);
+
+  self.calculatedFee = ko.observable(0);
+  self.feeOption = ko.observable('optimal');
+  self.customFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.feeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+  self.feeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.customFee(null);
+      self.customFee.isModified(false);
+    }
+  });
+
 
   self.assetName = ko.observable('').extend({
     required: true,
@@ -720,16 +934,48 @@ function PayDividendModalViewModel() {
     return smartFormat(self.dividendAssetBalRemainingPostPay());
   }, self);
 
+  self.normalizedBalance = ko.computed(function() {
+      if (self.addressVM() === null || self.btcBalance() === null) return null;
+      return self.btcBalance()
+  }, self);
+
+  self.dispNormalizedBalance = ko.computed(function() {
+    return smartFormat(self.normalizedBalance(), null, 8);
+  }, self);
+
+  self.normalizedBalRemaining = ko.computed(function() {
+    //var curBalance = normalizeQuantity(self.btcBalance(), self.divisible());
+    var curBalance = self.btcBalance();
+    var balRemaining = subFloat(curBalance, self.calculatedFee())
+    if (balRemaining < 0) return null;
+    return balRemaining;
+  }, self);
+
+  self.dispNormalizedBalRemaining = ko.computed(function() {
+    return smartFormat(self.normalizedBalRemaining(), null, 8);
+  }, self);
+
+  self.normalizedBalRemainingIsSet = ko.computed(function() {
+    return self.normalizedBalRemaining() !== null;
+  }, self);
+
+  self.customFeeIsNull = ko.computed(function() {
+    return self.customFee() == null;
+  }, self);
+
   self.validationModel = ko.validatedObservable({
     quantityPerUnit: self.quantityPerUnit,
     selectedDividendAsset: self.selectedDividendAsset,
-    assetName: self.assetName
+    assetName: self.assetName,
+    customFee: self.customFee
   });
 
   self.resetForm = function() {
     self.quantityPerUnit(null);
     self.availableDividendAssets([]);
     self.selectedDividendAsset(null);
+    self.feeOption('optimal');
+    self.customFee(null);
     self.validationModel.errors.showAllMessages(false);
     self.feeController.reset();
   }
@@ -781,7 +1027,7 @@ function PayDividendModalViewModel() {
       quantity_per_unit: denormalizeQuantity(parseFloat(self.quantityPerUnit())),
       asset: self.assetData().asset,
       dividend_asset: self.selectedDividendAsset(),
-      _fee_option: 'custom',
+      _fee_option: self.feeOption(),
       _custom_fee: self.feeController.getCustomFee()
     }
   }
@@ -803,9 +1049,10 @@ function PayDividendModalViewModel() {
   });
 
 
-  self.showModal = function(address, resetForm) {
+  self.showModal = function(address, btcBalance, resetForm) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
     if (resetForm) self.resetForm();
+    self.btcBalance(btcBalance);
     self.addressVM(address);
     self.assetName('');
     self.assetData(null);
@@ -829,10 +1076,10 @@ function PayDividendModalViewModel() {
     });
   }
 
-  self.show = function(address, resetForm) {
+  self.show = function(address, btcBalance, resetForm) {
     trackDialogShow('PayDividendAttempt');
     checkCountry("dividend", function() {
-      self.showModal(address, resetForm);
+      self.showModal(address, btcBalance, resetForm);
     });
   }
 

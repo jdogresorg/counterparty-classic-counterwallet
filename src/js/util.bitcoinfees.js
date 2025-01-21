@@ -38,6 +38,20 @@ var CWBitcoinFees = (function() {
     })
   }
 
+  exports.getFeeByName = function(name, cb) {
+    getCache(function(fees) {
+      for (var i=0;i<fees.length;i++){
+	    if (fees[i].name == name){
+		    cb(fees[i])
+			return
+		}
+      }
+      
+      cb(null)
+      return
+    })
+  }
+
   exports.getFeesByName = function(cb) {
     getCache(function(fees) {
       var feesByName = {}

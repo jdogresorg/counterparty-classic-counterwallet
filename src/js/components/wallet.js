@@ -893,7 +893,7 @@ function WalletViewModel() {
           }
           else if (data['_fee_option'] === 'custom') {
             assert(data.hasOwnProperty('_custom_fee'));
-            data['fee_per_kb'] = data['_custom_fee'] * 1024;
+            data['fee_per_kb'] = data['_custom_fee'] * 1;
           }
           delete data['_fee_option'];
         }

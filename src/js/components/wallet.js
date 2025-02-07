@@ -850,10 +850,12 @@ function WalletViewModel() {
     // determine whether to read the get_optimal_fee_per_kb from the server
     //   or skip it
     var provideOptimalFeeFn;
-    if (data['_fee_option'] === 'custom') {
+    if ((data['_fee_option'] === 'custom') || (data['_fee_option'] === 'optimal') || (data['_fee_option'] === 'low_priority')) {
       provideOptimalFeeFn = function(cb) {
         // don't call the fee api
-        cb(null)
+        CWBitcoinFees.getFeesByName(function(fees){
+            cb(fees)
+        })
       }
     } else {
       provideOptimalFeeFn = function(cb) {
@@ -881,17 +883,17 @@ function WalletViewModel() {
       function(fee_per_kb) {
         // default to optimal if it exists
         if (fee_per_kb != null && fee_per_kb['optimal'] != null) {
-          data['fee_per_kb'] = fee_per_kb['optimal'];
+          data['fee_per_kb'] = fee_per_kb['optimal'].fee;
         }
 
         // check for an explicit fee option
         if (data.hasOwnProperty('_fee_option')) {
           if (data['_fee_option'] === 'low_priority') {
-            data['fee_per_kb'] = fee_per_kb['low_priority'];
+            data['fee_per_kb'] = fee_per_kb['low_priority'].fee;
           }
           else if (data['_fee_option'] === 'custom') {
             assert(data.hasOwnProperty('_custom_fee'));
-            data['fee_per_kb'] = data['_custom_fee'] * 1024;
+            data['fee_per_kb'] = data['_custom_fee'] * 1;
           }
           delete data['_fee_option'];
         }

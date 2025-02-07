@@ -336,17 +336,20 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
     if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
 
     var xcpBalance = WALLET.getBalance(self.ADDRESS, KEY_ASSET.XCP);
-    CREATE_ASSET_MODAL.show(self.ADDRESS, xcpBalance, true);
+    var btcBalance = WALLET.getBalance(self.ADDRESS, KEY_ASSET.BTC);
+    CREATE_ASSET_MODAL.show(self.ADDRESS, xcpBalance, btcBalance, true);
   }
 
   self.payDividend = function() {
     if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
-    PAY_DIVIDEND_MODAL.show(self);
+	var btcBalance = WALLET.getBalance(self.ADDRESS, KEY_ASSET.BTC);
+    PAY_DIVIDEND_MODAL.show(self, btcBalance);
   };
 
   self.broadcast = function() {
     if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
-    BROADCAST_MODAL.show(self, true);
+    var btcBalance = WALLET.getBalance(self.ADDRESS, KEY_ASSET.BTC);
+	BROADCAST_MODAL.show(self, btcBalance, true);
   };
 
   self.selectAddressText = function() {

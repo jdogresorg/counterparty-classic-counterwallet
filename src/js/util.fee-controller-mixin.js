@@ -63,6 +63,7 @@ var CWFeeModelMixin = function(modalDialogModel, opts) {
     // observables
     defineObservable('customFee', null);                                       // = ko.observable(null);
     defineObservable('feeSlider', 0);                                          // = ko.observable(0);
+    defineObservable('feeOption', "optimal");                                  // = ko.observable(0);
     defineObservable('feeSliderMax', 0);                                       // = ko.observable(0)
     defineObservable('feePriorityLocaleName', 'fee_priority_details_between'); // = ko.observable('fee_priority_details_between');
     defineObservable('feePriorityLocaleArgs', ['','','']);                     // = ko.observable(['','','']);
@@ -81,7 +82,7 @@ var CWFeeModelMixin = function(modalDialogModel, opts) {
       opts.transactionParameters[i].subscribe(feeParametersChanged)
     }
     obsObj('customFee').subscribe(feeParametersChanged)
-
+    obsObj('feeOption').subscribe(feeParametersChanged)
     obsObj('feeSlider').subscribe(function(sliderOffset) {
       CWBitcoinFees.getFeeByOffset(sliderOffset, function(fee) {
         obsObj('customFee')(fee.fee);
@@ -115,8 +116,11 @@ var CWFeeModelMixin = function(modalDialogModel, opts) {
     clearGeneratedTransaction();
 
     // update fee information display
-    CWBitcoinFees.getFeeByOffset(getObs('feeSlider'), function(fee) {
-      if (fee.maxDelay == 0) {
+    CWBitcoinFees.getFeeByName(getObs('feeOption'), function(fee) {
+      if (fee == null){//Custom fee
+        setObs('feePriorityLocaleName', 'fee_details_only');
+        setObs('feePriorityLocaleArgs', [getObs('customFee')]);      
+      } else if (fee.maxDelay == 0) {
         setObs('feePriorityLocaleName', 'fee_priority_details_no_wait');
         setObs('feePriorityLocaleArgs', [fee.fee]);
       } else if (fee.minDelay == 0) {
@@ -154,6 +158,10 @@ var CWFeeModelMixin = function(modalDialogModel, opts) {
 
         setObs('_unsignedTx', extendedTxInfo.tx_hex);
         var feeFloat = extendedTxInfo.btc_fee / UNIT
+        
+        if ("calculatedFee" in self){
+            self.calculatedFee(feeFloat)
+        }
 
         CWBitcoinQuote.getQuote(function(quote) {
           var fiatString = formatFiat(feeFloat * quote, 2, 2)

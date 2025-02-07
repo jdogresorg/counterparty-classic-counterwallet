@@ -421,6 +421,7 @@ function SendModalViewModel() {
   self.rawBalance = ko.observable(null);
   self.divisible = ko.observable();
   self.feeOption = ko.observable('optimal');
+  self.calculatedFee = ko.observable(0);
   self.customFee = ko.observable(null).extend({
     validation: [{
       validator: function(val, self) {
@@ -593,7 +594,7 @@ function SendModalViewModel() {
     var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
     var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
     if (self.asset() === KEY_ASSET.BTC)
-      balRemaining = subFloat(balRemaining, normalizeQuantity(MIN_FEE))  // include the fee
+      balRemaining = subFloat(balRemaining, self.calculatedFee())  // include the fee
     if (balRemaining < 0) return null;
     return balRemaining;
   }, self);
@@ -719,7 +720,7 @@ function SendModalViewModel() {
       asset: self.asset(),
       _asset_divisible: self.divisible(),
       _pubkeys: additionalPubkeys.concat(self._additionalPubkeys),
-      _fee_option: 'custom',
+      _fee_option: self.feeOption(),
       _custom_fee: self.feeController.getCustomFee()
     };
 
@@ -834,6 +835,7 @@ function CreateDispenserModalViewModel() {
   self.rawBalance = ko.observable(null);
   self.divisible = ko.observable();
   self.feeOption = ko.observable('optimal');
+  self.calculatedFee = ko.observable(0);
   self.customFee = ko.observable(null).extend({
     validation: [{
       validator: function(val, self) {
@@ -897,6 +899,18 @@ function CreateDispenserModalViewModel() {
     }
   });
 
+  self.give_quantity.subscribeChanged(function(newValue, prevValue){
+    self.customFee.valueHasMutated();
+  })
+
+  self.escrow_quantity.subscribeChanged(function(newValue, prevValue){
+    self.customFee.valueHasMutated();
+  })  
+
+  self.mainchainrate.subscribeChanged(function(newValue, prevValue){
+    self.customFee.valueHasMutated();
+  })
+
   self.normalizedBalance = ko.computed(function() {
     if (self.address() === null || self.rawBalance() === null) return null;
     return normalizeQuantity(self.rawBalance(), self.divisible());
@@ -910,7 +924,7 @@ function CreateDispenserModalViewModel() {
     if (!isNumber(self.escrow_quantity())) return null;
     var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
     var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.escrow_quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
-
+    balRemaining = subFloat(balRemaining, self.calculatedFee())  // include the fee
     if (balRemaining < 0) return null;
     return balRemaining;
   }, self);
@@ -979,7 +993,7 @@ function CreateDispenserModalViewModel() {
       escrow_quantity: denormalizeQuantity(parseFloat(self.escrow_quantity()), self.divisible()),
       mainchainrate: denormalizeQuantity(parseFloat(self.mainchainrate()), true),
       status: 0, // 0 for open, 10 for close
-      _fee_option: 'custom',
+      _fee_option: self.feeOption(),
       _custom_fee: self.feeController.getCustomFee()
     };
 
@@ -1006,11 +1020,12 @@ function CreateDispenserModalViewModel() {
     self.assetDisp(assetDisp);
     self.rawBalance(rawBalance);
     self.divisible(isDivisible);
+    self.feeOption("optimal")
     $('#sendFeeOption').select2("val", self.feeOption()); //hack
     self.shown(true);
 
-    $('#MemoType').select2("val", self.memoType()); // hack to set select2 value
-    trackDialogShow('Send');
+    //$('#MemoType').select2("val", self.memoType()); // hack to set select2 value
+    //trackDialogShow('Send');
   }
 
   self.hide = function() {
@@ -1995,6 +2010,26 @@ function BroadcastModalViewModel() {
   var self = this;
 
   self.addressObj = null;
+  self.btcBalance = ko.observable(null);
+
+  self.calculatedFee = ko.observable(0);
+  self.feeOption = ko.observable('optimal');
+  self.customFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.feeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+  self.feeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.customFee(null);
+      self.customFee.isModified(false);
+    }
+  });
 
   self.shown = ko.observable(false);
 
@@ -2020,12 +2055,42 @@ function BroadcastModalViewModel() {
     date: true
   });
 
+  self.normalizedBalance = ko.computed(function() {
+      if (self.address() === null || self.btcBalance() === null) return null;
+      return self.btcBalance()
+  }, self);
+
+  self.dispNormalizedBalance = ko.computed(function() {
+    return smartFormat(self.normalizedBalance(), null, 8);
+  }, self);
+
+  self.normalizedBalRemaining = ko.computed(function() {
+    //var curBalance = normalizeQuantity(self.btcBalance(), self.divisible());
+    var curBalance = self.btcBalance();
+    var balRemaining = subFloat(curBalance, self.calculatedFee())
+    if (balRemaining < 0) return null;
+    return balRemaining;
+  }, self);
+
+  self.dispNormalizedBalRemaining = ko.computed(function() {
+    return smartFormat(self.normalizedBalRemaining(), null, 8);
+  }, self);
+
+  self.normalizedBalRemainingIsSet = ko.computed(function() {
+    return self.normalizedBalRemaining() !== null;
+  }, self);
+
+  self.customFeeIsNull = ko.computed(function() {
+    return self.customFee() == null;
+  }, self);
+
   self.validationModel = ko.validatedObservable({
     address: self.address,
     textValue: self.textValue,
     numericalValue: self.numericalValue,
     feeFraction: self.feeFraction,
-    broadcastDate: self.broadcastDate
+    broadcastDate: self.broadcastDate,
+    customFee: self.customFee
   });
 
   self.resetForm = function() {
@@ -2036,11 +2101,14 @@ function BroadcastModalViewModel() {
     self.feeFraction(0);
     self.broadcastDate(new Date());
     self.validationModel.errors.showAllMessages(false);
+    self.feeOption('optimal');
+    self.customFee(null);   
   }
 
-  self.show = function(addressObj, resetForm) {
+  self.show = function(addressObj, btcBalance, resetForm) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
     if (resetForm) self.resetForm();
+    self.btcBalance(btcBalance);
     self.addressObj = addressObj;
     self.address(self.addressObj.ADDRESS);
     self.shown(true);
@@ -2088,7 +2156,7 @@ function BroadcastModalViewModel() {
       text: self.textValue(),
       timestamp: self.broadcastDate() ? parseInt(self.broadcastDate().getTime() / 1000) : null,
       value: parseFloat(self.numericalValue()),
-      _fee_option: 'custom',
+      _fee_option: self.feeOption(),
       _custom_fee: self.feeController.getCustomFee()
     };
   }

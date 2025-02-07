@@ -8,12 +8,14 @@ var CWBitcoinFees = (function() {
   //   make it obvious that there is no predictability here
   var defaultFees = [
     {
+      name: "low_priority",
       offset: 0,
       fee: 101,
       minDelay: 1,
       maxDelay: 9999
     },
     {
+      name: "optimal",
       offset: 1,
       fee: 201,
       minDelay: 1,
@@ -36,6 +38,32 @@ var CWBitcoinFees = (function() {
     })
   }
 
+  exports.getFeeByName = function(name, cb) {
+    getCache(function(fees) {
+      for (var i=0;i<fees.length;i++){
+	    if (fees[i].name == name){
+		    cb(fees[i])
+			return
+		}
+      }
+      
+      cb(null)
+      return
+    })
+  }
+
+  exports.getFeesByName = function(cb) {
+    getCache(function(fees) {
+      var feesByName = {}
+      for (var i=0;i<fees.length;i++){
+          feesByName[fees[i].name] = fees[i]
+      }
+      
+      cb(feesByName)
+      return
+    })
+  }
+  
   exports.defaultFee = function(cb) {
     getCache(function() {
       for (var i = 0; i < feesCache.length; i++) {
@@ -69,7 +97,7 @@ var CWBitcoinFees = (function() {
   function refreshCache(cb) {
     $.ajax({
       method: "GET",
-      url: "https://bitcoinfees.earn.com/api/v1/fees/list",
+      url: "https://classic.tokenscan.io/api/network",
       dataType: 'json',
       success: function(apiResponse) {
         buildFeesFromResponse(apiResponse);
@@ -92,32 +120,30 @@ var CWBitcoinFees = (function() {
   }
 
   function buildFeesFromResponse(apiResponse) {
-    var rawFees = apiResponse.fees
+    var rawFees = apiResponse.fee_info
     // $.jqlog.debug('buildFeesFromResponse rawFees '+JSON.stringify(rawFees,null,2));
     feesCache = []
 
-    var highestOffset = -1;
-    var feeOffest = 0;
-    for (var i = 0; i < rawFees.length; i++) {
-      var feeEntry = rawFees[i]
-      if (feeEntry.minFee == 0) {
-        continue;
-      }
+    var lowPriorityFee = rawFees.low_priority
+    var optimalFee = rawFees.optimal
 
-      var cacheEntry = {
-        offset: feeOffest,
-        fee: feeEntry.minFee,
-        minDelay: feeEntry.minDelay,
-        maxDelay: feeEntry.maxDelay
-      };
-      feesCache.push(cacheEntry);
-      ++feeOffest;
-
-      // stop at 0
-      if (feeEntry.maxDelay == 0) {
-        break;
-      }
+    var lowPriorityEntry = {
+      name: "low_priority",
+      offset: 0,
+      fee: lowPriorityFee,
+      minDelay: 1,
+      maxDelay: 9999
     }
+    var optimalEntry = {
+      name: "optimal",
+      offset: 1,
+      fee: optimalFee,
+      minDelay: 1,
+      maxDelay: 1000
+    }
+
+    feesCache.push(lowPriorityEntry)
+    feesCache.push(optimalEntry)
 
     // $.jqlog.debug('buildFeesFromResponse feesCache '+JSON.stringify(feesCache));
   }
